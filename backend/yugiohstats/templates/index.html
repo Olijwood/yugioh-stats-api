@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style='margin-top:10px'> 
+    <style type='text/css'>
+        .magicSets a{ color:#0e5b93;text-decoration:none;}
+        .magicSets a:hover {text-decoration: underline;}
+    </style>
+    <div class="magicSets" style="font-family:Arial;">
+        <div style>
+            <div style='display:inline-block;width:295px'>
+                <div style="width:275px;background:#F0F0F0;border:1px solid #dcdadb;color:#595959;padding:5px;text-transform:uppercase;font-weight:bold;font-size:15px;margin-bottom:10px;">Boosters</div>
+                
+                <ul style='list-style-type:none;padding:0;font-size:14px;'>
+                    {% for booster in booster_list %}
+                        <li style='padding:7px 0; padding-left:15px;margin:0;'>
+                            <a href='{% url "set-detail" booster.id %}' style='text=decoration:none; padding:0px 0px 1px 0px; line-height:20px;'>
+                                {{ booster.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                <div style="width:275px;background:#F0F0F0;border:1px solid #dcdadb;color:#595959;padding:5px;text-transform:uppercase;font-weight:bold;font-size:15px;margin-bottom:10px;">Premium Packs</div>
+                
+                <ul style='list-style-type:none;padding:0;font-size:14px;'>
+                    {% for premium in premium_list %}
+                        <li style='padding:7px 0; padding-left:15px;margin:0;'>
+                            <a href='' style='text=decoration:none; padding:0px 0px 1px 0px; line-height:20px;'>
+                                {{ premium.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                <div style="width:275px;background:#F0F0F0;border:1px solid #dcdadb;color:#595959;padding:5px;text-transform:uppercase;font-weight:bold;font-size:15px;margin-bottom:10px;">Champion Packs</div>
+                
+                <ul style='list-style-type:none;padding:0;font-size:14px;'>
+                    {% for champion in champion_list %}
+                        <li style='padding:7px 0; padding-left:15px;margin:0;'>
+                            <a href='' style='text=decoration:none; padding:0px 0px 1px 0px; line-height:20px;'>
+                                {{ champion.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                <div style="width:275px;background:#F0F0F0;border:1px solid #dcdadb;color:#595959;padding:5px;text-transform:uppercase;font-weight:bold;font-size:15px;margin-bottom:10px;">Tournament Packs</div>
+                
+                <ul style='list-style-type:none;padding:0;font-size:14px;'>
+                    {% for tournament in tournament_list %}
+                        <li style='padding:7px 0; padding-left:15px;margin:0;'>
+                            <a href='' style='text=decoration:none; padding:0px 0px 1px 0px; line-height:20px;'>
+                                {{ tournament.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,246 @@
+{% extends "../base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<head>
+    <style>
+        /* Additional styles for the filter menu */
+        .filter-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .filter-menu.active {
+            transform: translateX(0);
+        }
+        .filter-section {
+            padding: 20px;
+        }
+        .filter-section h4 {
+            margin-bottom: 10px;
+        }
+        .applied-filters {
+            margin-bottom: 20px;
+        }
+        .applied-filters button {
+            margin-right: 10px;
+            margin-bottom: 5px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .rarities-section {
+            margin-top: 20px;
+        }
+        .rarity-filter {
+            margin-bottom: 5px;
+        }
+
+        .positive {
+            color: green;
+        }
+        .negative {
+            color: red;
+        }
+        .userTable {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .userTable a {
+            color: #0e5b93;
+            text-decoration: none;
+        }
+        .userTable a:hover {
+            text-decoration: underline;
+        }
+        .userTable table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .userTable caption {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #0e5b93;
+            font-weight: bold;
+        }
+        .userTable th, .magicSets td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .userTable th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .userTable tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .userTable .table-container {
+            overflow-x: auto;
+        }
+        .userTable .positive {
+            color: green;
+        }
+        .userTable .negative {
+            color: red;
+        }
+        .userTable .rankingchange {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13.33333333px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            min-width: 152px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/set-detail.css' %}">
+</head>
+<section class="section-content", style='display: block'>
+
+    <h3>{{ set.title }}</h3>
+    <div class='search-section'>
+        <!-- Add a div for styling purposes -->
+        <div class="sort-by-container" style="border: 1px solid #ccc; border-radius: 5px; display: inline-block; font-family: 'Arial', sans-serif; margin-bottom: 20px;">
+            <select onchange="location = this.value;" class='sort-by-dropdown' style="background-color: #fff; border: none; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); cursor: pointer; outline: none; padding: 5px 10px; font-family: 'Arial', sans-serif; width: 100%;">
+                <option value="?sort_by=name">Sort by Name</option>
+                <option value="?sort_by=code">Sort by Yugioh Code</option>
+                <option value="?sort_by=price_low">Sort by Price: Low to High</option>
+                <option value="?sort_by=price_high">Sort by Price: High to Low</option>
+            </select>
+        </div>
+        <br>
+        <br>
+    </div>
+    <br>
+    {% if submitted %}
+        <div align='center' class='userTable'>
+            <h4>If your are planning on buying this set:</h4>
+            <h5>For {{user_price}}:<br></h5>
+            <form action='.' method='POST' id='form-user-booster-price'>
+                {% csrf_token %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope='col'>For {{user_price}}</th>
+                            <th scope='col'>Chance Greater Value</th>
+                            <th scope='col'>Gain/Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope='row'>Market Price</th>
+                            <td class="{{ user_cgv.mp|pn_cgv }}"> {{user_cgv.mp|format_pct}}</td>
+                            <td class="{{ user_gl.mp|pn_change }}"> {{user_gl.mp|format_dollars}}</td>
+                        </tr>
+                        <tr>
+                            <th scope='row'>Minimum Listing</th>
+                            <td class="{{ user_cgv.ml|pn_cgv }}"> {{user_cgv.ml|format_pct}}</td>
+                            <td class="{{ user_gl.ml|pn_change }}"> {{user_gl.ml|format_dollars}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <p>${{form.price}}<button type='submit'>Update Price</button>
+            </form>
+        </div>
+        <br>
+    {% else %}
+        <div align='center'>
+            <h4>If your are planning on buying this set:</h4>
+            <h6>Enter the price you are buying it for($) to see:<br></h6>
+                 <p>-Your chance of making more money when you open it<br>
+                 -The most probable amount of money you will gain or lose</p>
+                
+            <form action='.' method='POST' id='form-user-booster-price'>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type='submit'>Submit</button>
+            </form>
+        </div>
+        <br>
+    {% endif %}
+    <div>
+        <h4><a href="{% url "set-detail-graphs" set.id %}">
+            Click here
+        </a>to see analysis graphs for {{set.title}}</h4>
+        
+    <button class="filter-button" onclick="toggleFilterMenu()">Filter</button>
+    <div class="search-results">
+        {% for card in card_list %}
+        <div class="search-result">
+            <a href='#' class='search-result__a' style='text-decoration: none;'>
+                <section class='product-card__product' style='--background-color:#FFFFFF; --padding: 16px;'>
+                    <section class="product-card__image">
+                        <div class='lazy-image__wrapper'>
+                            <img src="{% static card.get_image %}" alt="{{ card.card_name }}" class='v-lazy-image'>
+                        </div>
+                    </section>
+                        <h3 class="product-card__category-name">YuGiOh</h3>
+                        <h4 class="product-card__subtitle">{{card.set.title}}</h4>
+                        <section class="product-card__rarity">
+                            <span>{{ card.card_rarity|format_rarity }}</span>
+                            <span> · </span>
+                            <span>{{ card.card_code }}</span>
+                        </section>
+                        <span class="product-card__title truncate">{{ card.card_name }}</span>
+                        <div class="inventory">
+                            {% if card.tcg_num_listings %}
+                                <span class="inventory__listing-count inventory__listing-count-block">
+                                    {{ card.tcg_num_listings }} listings from
+                                </span>
+                                <span class="inventory__price">
+                                    <span class='inventory__price-with-shipping'>${{ card.get_min_listing }}</span>
+                                </span>
+                            {% else %}
+                                <span class="inventory__listing-count inventory__listing-count-block">
+                                    No listings
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="product-card__market-price">
+                            Market Price:
+                            <span class="product-card__market-price--value">${{ card.get_market_price }}</span>
+                        </div>
+                    
+                </section>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<form method="post" id="filterForm">
+    {% csrf_token %}
+    <div class="filter-menu" id="filterMenu">
+        <button class="close-btn" onclick="toggleFilterMenu()">X</button>
+        <div class="filter-section">
+            <!-- Filter content -->
+        </div>
+        <div class="rarities-section">
+            <h4>Rarities</h4>
+            {% for rarity in rarity_options %}
+                <label><input type="checkbox" class="rarity-filter" name="rarity" value="{{ rarity.card_rarity }}"
+                {% if rarity.card_rarity in selected_rarities %} checked {% endif %}>
+                {{ rarity.card_rarity }} ({{ rarity.count }})</label>
+            {% endfor %}
+        </div>
+        <button type="submit">Apply Filters</button>
+    </div>
+</form>
+<script>
+    // Toggle filter menu visibility
+    function toggleFilterMenu() {
+        var filterMenu = document.getElementById("filterMenu");
+        filterMenu.classList.toggle("active");
+    }
+</script>
+{% endblock content %}

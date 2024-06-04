@@ -1,0 +1,16 @@
+{% extends "../base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<section class="section-content", style='display: block'>
+    <div>
+        <h3>{{set.title}}</h3>
+        <br>]
+        <img src="{% static cgv_graph %}">
+        <img src="{% static gl_graph %}">
+        <img src="{% static mean_graph %}">
+        <img src="{% static median_graph %}">
+    </div>
+</section>
+{% endblock content %}

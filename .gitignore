@@ -1,0 +1,23 @@
+# Ignore virtual enviroment
+venv
+
+# Ignore notebooks
+nbs 
+.ipynb_checkpoints
+
+# Ignore static images
+card-imgs
+
+# Ignore vscode
+.vscode
+
+# Ignore database
+db.sqlite3
+
+# Ignore enviroment
+.env
+
+backend/yugiohstats/staticfiles-cdn/media
+backend/yugiohstats/staticfiles-cdn/sets-data
+
+*__pycache__

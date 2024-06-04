@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block content %}
+
+<div style="margin-top: 20px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+    <style type="text/css">
+        .magicSets {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .magicSets a {
+            color: #0e5b93;
+            text-decoration: none;
+        }
+        .magicSets a:hover {
+            text-decoration: underline;
+        }
+        .magicSets table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .magicSets caption {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #0e5b93;
+            font-weight: bold;
+        }
+        .magicSets th, .magicSets td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .magicSets th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .magicSets tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .magicSets .table-container {
+            overflow-x: auto;
+        }
+        .magicSets .positive {
+            color: green;
+        }
+        .magicSets .negative {
+            color: red;
+        }
+        .magicSets .rankingchange {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13.33333333px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            min-width: 152px;
+        }
+    </style>
+
+    <div class="magicSets">
+        <div class="table-container">
+            <div>
+                {% if rank_by == 'cgv' %}
+                    <h2>Sets Ranked by their opened Chance Greater Value (%)</h3>
+
+                    {% if mporml == 'mp' %}
+                        <h5>Simulated by their cards' Market Price value</h5>
+                        <br>
+                        <span>
+                            <h6>Rank by: <a href="?rank_by=gl&mporml=mp&sort=mp_gl_ranking&order=asc">Gain/Loss ($)</a>  Simulate by: <a href="?mporml=ml&sort=ml_ranking&order=asc">Minimum Listing</a></h6>
+                        </span>
+                    {% endif %}
+                    {% if mporml == 'ml' %}
+                        <h5>Simulated by their cards' Minimum Listing value</h5>
+                        <br>
+                        <span>
+                            <h6>Rank by: <a href="?rank_by=gl&mporml=mp&sort=mp_gl_ranking&order=asc">Gain/Loss ($)</a>   Simulate by: <a href="?mporml=mp&sort=mp_ranking&order=asc">Market Price</a></h6>
+                        </span>
+                    {% endif %}
+
+                   
+                    {% if mporml == 'mp' %}
+                    <table>
+                        <caption>
+                            Sets Ranked By Chance Greater Value (CGV)
+                            <span>Simulated by their Market Price Values<span> 
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <a href="?sort=mp_ranking&order={% if current_sort == 'mp_ranking' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Rank
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=set__title&order={% if current_sort == 'set__title' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Title
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_cgv_today&order={% if current_sort == 'mp_cgv_today' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Today
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_cgv_week&order={% if current_sort == 'mp_cgv_week' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change 7days
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_cgv_all_time&order={% if current_sort == 'mp_cgv_all_time' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change all time
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in rankings %}
+                            <tr>
+                                <th scope='row'>{{ranking.mp_ranking}} <span class="rankingchange {{ ranking.mp_ranking_change|pn_change }}">{{ranking.mp_ranking_change|format_ranking_change}}</span></th>
+                                <td >
+                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                        {{ranking.set.title}}
+                                    </a>
+                                </td>
+                                <td class="{{ ranking.mp_cgv_today|pn_cgv }}">{{ ranking.mp_cgv_today|format_pct}}</td>
+                                <td class="{{ ranking.mp_cgv_week|pn_change }}">{{ranking.mp_cgv_week|format_pct_change}}</td>
+                                <td class="{{ ranking.mp_cgv_all_time|pn_change }}">{{ranking.mp_cgv_all_time|format_pct_change}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                    {% if mporml == 'ml' %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <a href="?sort=ml_ranking&order={% if current_sort == 'ml_ranking' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Rank
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=set__title&order={% if current_sort == 'set__title' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Title
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=ml_cgv_today&order={% if current_sort == 'ml_cgv_today' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Today
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_cgv_week&order={% if current_sort == 'mp_cgv_week' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change 7days
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=ml_cgv_all_time&order={% if current_sort == 'ml_cgv_all_time' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change all time
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in rankings %}
+                            <tr>
+                                <th scope="row">{{ranking.ml_ranking}} <span class="rankingchange {{ ranking.ml_ranking_change|pn_change }}">{{ranking.ml_ranking_change|format_ranking_change}}</span></th>
+                                <td>
+                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                        {{ranking.set.title}}
+                                    </a>
+                                </td>
+                                <td class="{{ ranking.ml_cgv_today|pn_cgv }}">{{ ranking.ml_cgv_today|format_pct}}</td>
+                                <td class="{{ ranking.ml_cgv_week|pn_change }}">{{ranking.ml_cgv_week|format_pct_change}}</td>
+                                <td class="{{ ranking.ml_cgv_all_time|pn_change }}">{{ranking.ml_cgv_all_time|format_pct_change}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                    
+                {% endif %}
+                {% if rank_by == 'gl' %}
+                    <h2>Sets Ranked by their probable Gain/Loss once opened </h3>
+
+                    {% if mporml == 'mp' %}
+                    <h5>Simulated by their cards' Market Price value</h5>
+                    <br>
+                    <h6>Rank by: <a href="?rank_by=cgv&mporml=mp&sort=mp_ranking&order=asc">Chance Greater Value (%)</a>  Simulate by: <a href="?rank_by=gl&mporml=ml&sort=ml_gl_ranking&order=asc">Minimum Listing</a></h6>
+                    {% endif %}
+                    {% if mporml == 'ml' %}
+                    <h5>Simulated by their cards' Minimum Listing value</h5>
+                    <br>
+                    <span>
+                        <h6>Rank by: <a href="?rank_by=cgv&mporml=mp&sort=mp_ranking&order=asc">Chance Greater Value (%)</a>   Simulate by: <a href="?rank_by=gl&mporml=mp&sort=mp_gl_ranking&order=asc">Market Price</a></h6>
+                    </span>
+                    {% endif %}
+
+                    {% if mporml == 'mp' %}
+                    <table>
+                        <caption>
+                            Sets Ranked by their Probable Gain/Loss once opened
+                            <span>Simulated by their Market Price Values<span> 
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <a href="?sort=mp_gl_ranking&order={% if current_sort == 'mp_gl_ranking' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Rank
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=set__title&order={% if current_sort == 'set__title' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Title
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_gl_today&order={% if current_sort == 'mp_gl_today' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Today
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_gl_week&order={% if current_sort == 'mp_gl_week' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change 7days
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_gl_all_time&order={% if current_sort == 'mp_gl_all_time' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change all time
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in gl_rankings %}
+                            <tr>
+                                <th scope="row">
+                                    {{ranking.mp_gl_ranking}} <span class="rankingchange {{ ranking.mp_ranking_change|pn_change }}">{{ranking.mp_ranking_change|format_ranking_change}}</span>
+                                </th>
+                                <td>
+                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                        {{ranking.set.title}}
+                                    </a>
+                                </td>
+                                <td class="{{ ranking.mp_gl_today|pn_change }}">{{ ranking.mp_gl_today|format_dollars}}</td>
+                                <td class="{{ ranking.mp_gl_week|pn_change }}">{{ranking.mp_gl_week|format_pct_change}}</td>
+                                <td class="{{ ranking.mp_gl_all_time|pn_change }}">{{ranking.mp_gl_all_time|format_pct_change}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                    {% if mporml == 'ml' %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <a href="?sort=ml_gl_ranking&order={% if current_sort == 'ml_gl_ranking' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Rank
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=set__title&order={% if current_sort == 'set__title' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Title
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=ml_gl_today&order={% if current_sort == 'ml_gl_today' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Today
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=mp_gl_week&order={% if current_sort == 'mp_gl_week' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change 7days
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=ml_gl_all_time&order={% if current_sort == 'ml_gl_all_time' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change all time
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in gl_rankings %}
+                            <tr>
+                                <th scope='row'>
+                                    {{ranking.ml_gl_ranking}} <span class="rankingchange {{ ranking.ml_ranking_change|pn_change }}">{{ranking.ml_ranking_change|format_ranking_change}}</span>
+                                </th>
+                                <td>
+                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                        {{ranking.set.title}}
+                                    </a>
+                                </td>
+                                <td class="{{ ranking.ml_gl_today|pn_change }}">{{ ranking.ml_gl_today|format_dollars}}</td>
+                                <td class="{{ ranking.ml_gl_week|pn_change }}">{{ranking.ml_gl_week|format_pct_change}}</td>
+                                <td class="{{ ranking.ml_gl_all_time|pn_change }}">{{ranking.ml_gl_all_time|format_pct_change}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,71 @@
+/* Grid layout for the cards */
+.search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 20px;
+}
+
+/* Styling for each card */
+.search-result {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex; /* Use flexbox to align image and details side by side */
+}
+
+/* Styling for the left section (image) */
+.product-card__image {
+    padding: 20px;
+    flex: 0 0 auto;
+    max-width: 144px;
+}
+
+/* Styling for the right section (details) */
+.product-card__details {
+    padding: 20px;
+    flex: 1 1 auto;
+}
+
+/* Title and subtitle */
+.product-card__category-name,
+.product-card__subtitle {
+    color: #555; /* Mid-dark grey */
+    font-size: 1.2em;
+}
+
+/* Card rarity and code */
+.product-card__rarity {
+    color: #555; /* Mid-dark grey */
+    margin-bottom: 10px;
+}
+
+/* Card title */
+.product-card__title {
+    font-weight: bold;
+    color: #000; /* Black */
+    margin-bottom: 10px;
+}
+
+/* Number of listings */
+.inventory__listing-count {
+    color: #555; /* Mid-dark grey */
+    display: block; /* Display listings count on a new line */
+}
+
+/* Minimum listing price */
+.inventory__price {
+    font-weight: bold;
+    color: #000; /* Black */
+    font-size: 1.4em; /* Larger font size */
+}
+
+/* Market price */
+.product-card__market-price {
+    font-weight: bold;
+    color: #000; /* Black */
+    margin-top: 10px;
+}
+
+.product-card__market-price--value {
+    color: green;
+}
