@@ -17,11 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 
 from sets.views import set_list_view
+from ct_expansions.views import index_yugioh_expansion_rank_view
 
 urlpatterns = [
-    path('', set_list_view, name='home'),
+    # path('', set_list_view, name='home'),
+    path('', index_yugioh_expansion_rank_view, name='home'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls'), name='api-urls'), 
     # path('api/sets/', include('sets.api_urls'), name='sets-api-urls'),
     path('sets/', include('sets.urls'), name='sets-urls'),
+    path('ct/', include('ct_expansions.urls'), name='ct-expansions-urls')
 ]

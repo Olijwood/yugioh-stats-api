@@ -59,8 +59,73 @@ def set_list_view(request):
     }
     return render(request, 'index.html', context)
 
-def set_detail_view(request, id):
+def old_set_detail_view(request, id):
     set_instance = Set.objects.get(id=id)
+    card_qs = Card.objects.filter(set=set_instance)
+    form = UserSubmittedBoosterPriceForm(request.POST or None)
+    
+    # Get the sorting option from the request
+    sort_by = request.GET.get('sort_by')
+    
+    # Apply sorting based on the selected option
+    if sort_by == 'name':
+        card_qs = card_qs.order_by('card_name')
+    elif sort_by == 'code':
+        card_qs = card_qs.order_by('card_code')
+    elif sort_by == 'price_low':
+        card_qs = card_qs.order_by('tcg_market_price')
+    elif sort_by == 'price_high':
+        card_qs = card_qs.order_by('-tcg_market_price')
+
+    # Fetch rarity options and counts for the set
+    rarity_options = card_qs.values('card_rarity').annotate(count=Count('card_rarity'))
+
+    # Check if any rarity filter is applied
+    selected_rarities = request.POST.getlist('rarity')
+
+    # If rarity filters are selected, filter cards accordingly
+    if selected_rarities:
+        card_qs = card_qs.filter(card_rarity__in=selected_rarities)
+
+    cards_count = card_qs.count()
+    context = {
+        'set': set_instance,
+        'form': form,
+        'card_list': card_qs,
+        'card_count': cards_count,
+        'rarity_options': rarity_options,
+        'selected_rarities': selected_rarities,
+        'submitted': False
+
+    }
+    
+    if form.is_valid():
+        cleaned_data = form.cleaned_data
+        price = cleaned_data['price']
+        print(price)
+        set_code = set_instance.code
+        dict_cgv_gl = get_user_cgv_gainloss(set_code, price )
+        mp_cgv = dict_cgv_gl[0]['mp-cgv']
+        ml_cgv = dict_cgv_gl[1]['ml-cgv']
+        print(mp_cgv, ml_cgv)
+        mp_gl = dict_cgv_gl[0]['mp-gainloss']
+        ml_gl = dict_cgv_gl[1]['ml-gainloss']
+        
+        print(mp_gl, ml_gl)
+        user_gl = {'mp': mp_gl,
+                   'ml': ml_gl}
+        user_cgv = {'mp': mp_cgv,
+                   'ml': ml_cgv}
+        context['submitted'] = True
+        context['user_gl'] = user_gl
+        context['user_cgv'] = user_cgv
+        context['user_price'] = '$%.2f' % price
+        return render(request, 'sets/set-detail.html', context)
+    return render(request, 'sets/set-detail.html', context)
+
+def set_detail_view(request, code):
+    set_code = str(code).upper()
+    set_instance = Set.objects.get(code=set_code)
     card_qs = Card.objects.filter(set=set_instance)
     form = UserSubmittedBoosterPriceForm(request.POST or None)
     

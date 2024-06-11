@@ -53,6 +53,11 @@ INSTALLED_APPS = [
     'cards',
     'core',
     'sets',
+
+    # Card Trader Apps
+    'ct_expansions',
+    'ct_games',
+    'ct_cards',
     
 ]
 

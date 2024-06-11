@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block content %}
+
+<div style="margin-top: 20px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+    <style type="text/css">
+        .magicSets {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .magicSets a {
+            color: #0e5b93;
+            text-decoration: none;
+        }
+        .magicSets a:hover {
+            text-decoration: underline;
+        }
+        .magicSets table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .magicSets caption {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #0e5b93;
+            font-weight: bold;
+        }
+        .magicSets th, .magicSets td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .magicSets th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .magicSets tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .magicSets .table-container {
+            overflow-x: auto;
+        }
+        .magicSets .positive {
+            color: green;
+        }
+        .magicSets .negative {
+            color: red;
+        }
+        .magicSets .rankingchange {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 12.5px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            min-width: 152px;
+        }
+    </style>
+
+    <div class="magicSets">
+        <div class="table-container">
+            <div>
+                {% if rank_by == 'cgv' %}
+                    <h2>Expansions Ranked by their opened Chance Greater Value (%)</h3>
+                    <h6>Rank by: <a href="?rank_by=gl&sort=gl_ranking&order=asc">Gain/Loss (£)</a></h6>
+
+                    <table>
+                        <caption>
+                            Expansions Ranked By Chance Greater Value (CGV)
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <a href="?sort=cgv_ranking&order={% if current_sort == 'cgv_ranking' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Rank
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=expansion__name&order={% if current_sort == 'expansion__name' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Title
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=cgv_today&order={% if current_sort == 'cgv_today' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Today
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=cgv_week&order={% if current_sort == 'cgv_week' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change 7days
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=cgv_all_time&order={% if current_sort == 'cgv_all_time' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change all time
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in rankings %}
+                            <tr>
+                                <th scope='row'>{{ranking.cgv_ranking}} <span class="rankingchange {{ ranking.cgv_ranking_change|pn_change }}">{{ranking.cgv_ranking_change|format_ranking_change}}</span></th>
+                                <td >
+                                    <a href="{% url "set-detail" ranking.expansion.code %}">
+                                        {{ranking.expansion.name}}
+                                    </a>
+                                </td>
+                                <td class="{{ ranking.cgv_today|pn_cgv }}">{{ ranking.cgv_today|format_pct}}</td>
+                                <td class="{{ ranking.cgv_week|pn_change }}">{{ranking.cgv_week|format_pct_change}}</td>
+                                <td class="{{ ranking.cgv_all_time|pn_change }}">{{ranking.cgv_all_time|format_pct_change}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                {% endif %}
+                {% if rank_by == 'gl' %}
+                    <h2>Expansions Ranked by their probable Gain/Loss (£) once opened </h3>
+                    <h6>Rank by: <a href="?rank_by=cgv&sort=cgv_ranking&order=asc">Chance Greater Value (%)</a>
+                    
+                    <table>
+                        <caption>
+                            Expansions Ranked by their Probable Gain/Loss once opened
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <a href="?sort=gl_ranking&order={% if current_sort == 'gl_ranking' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Rank
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=expansion__name&order={% if current_sort == 'expansion__name' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Title
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=gl_today&order={% if current_sort == 'gl_today' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Today
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=gl_week&order={% if current_sort == 'gl_week' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change 7days
+                                    </a>
+                                </th>
+                                <th scope="col">
+                                    <a href="?sort=gl_all_time&order={% if current_sort == 'gl_all_time' and current_order == 'asc' %}desc{% else %}asc{% endif %}">
+                                        Change all time
+                                    </a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in rankings %}
+                            <tr>
+                                <th scope="row">
+                                    {{ranking.gl_ranking}} <span class="rankingchange {{ ranking.gl_ranking_change|pn_change }}">{{ranking.gl_ranking_change|format_ranking_change}}</span>
+                                </th>
+                                <td>
+                                    <a href="{% url "set-detail" ranking.expansion.code %}">
+                                        {{ranking.expansion.name}}
+                                    </a>
+                                </td>
+                                <td class="{{ ranking.gl_today|pn_change }}">{{ ranking.gl_today|format_sterling}}</td>
+                                <td class="{{ ranking.gl_week|pn_change }}">{{ranking.gl_week|format_pct_change}}</td>
+                                <td class="{{ ranking.gl_all_time|pn_change }}">{{ranking.gl_all_time|format_pct_change}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -21,3 +21,5 @@ backend/yugiohstats/staticfiles-cdn/media
 backend/yugiohstats/staticfiles-cdn/sets-data
 
 *__pycache__
+
+.gitignore

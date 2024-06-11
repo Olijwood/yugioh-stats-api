@@ -395,20 +395,19 @@ def update_ranking_change():
 
 def update_ranking_change():
     today = date.today()
-    yesterday = date.today() - timedelta(days=1)
-
+    last_ranking_date = SetRankings.objects.values_list('ranking_date', flat=True).filter(ranking_date__lt=today).order_by('-ranking_date').first()
     todayrankings = SetRankings.objects.filter(ranking_date=today)
-    yesterday_rankings = SetRankings.objects.filter(ranking_date=yesterday)
+    last_rankings = SetRankings.objects.filter(ranking_date=last_ranking_date)
 
     for ranking in todayrankings:
         mp_rank_today = ranking.mp_ranking
-        mp_rank_yesterday = yesterday_rankings.get(set=ranking.set).mp_ranking
-        mp_ranking_change = mp_rank_yesterday - mp_rank_today
+        mp_rank_last = last_rankings.get(set=ranking.set).mp_ranking
+        mp_ranking_change = mp_rank_last - mp_rank_today
         ranking.mp_ranking_change = mp_ranking_change
 
         ml_rank_today = ranking.ml_ranking
-        ml_rank_yesterday = yesterday_rankings.get(set=ranking.set).ml_ranking
-        ml_ranking_change = ml_rank_yesterday - ml_rank_today
+        ml_rank_last = last_rankings.get(set=ranking.set).ml_ranking
+        ml_ranking_change = ml_rank_last - ml_rank_today
         ranking.ml_ranking_change = ml_ranking_change
         ranking.save()
     print('updated ranking changes')
@@ -416,20 +415,20 @@ def update_ranking_change():
 
 def update_gl_ranking_change():
     today = date.today()
-    yesterday = date.today() - timedelta(days=1)
-
+    
+    last_ranking_date = SetGainLossRanking.objects.values_list('ranking_date', flat=True).filter(ranking_date__lt=today).order_by('-ranking_date').first()
     todayrankings = SetGainLossRanking.objects.filter(ranking_date=today)
-    yesterday_rankings = SetGainLossRanking.objects.filter(ranking_date=yesterday)
+    last_rankings = SetGainLossRanking.objects.filter(ranking_date=last_ranking_date)
 
     for ranking in todayrankings:
         mp_rank_today = ranking.mp_gl_ranking
-        mp_rank_yesterday = yesterday_rankings.get(set=ranking.set).mp_gl_ranking
-        mp_ranking_change = mp_rank_yesterday - mp_rank_today
+        mp_rank_last = last_rankings.get(set=ranking.set).mp_gl_ranking
+        mp_ranking_change = mp_rank_last - mp_rank_today
         ranking.mp_ranking_change = mp_ranking_change
 
         ml_rank_today = ranking.ml_gl_ranking
-        ml_rank_yesterday = yesterday_rankings.get(set=ranking.set).ml_gl_ranking
-        ml_ranking_change = ml_rank_yesterday - ml_rank_today
+        ml_rank_last = last_rankings.get(set=ranking.set).ml_gl_ranking
+        ml_ranking_change = ml_rank_last - ml_rank_today
         ranking.ml_ranking_change = ml_ranking_change
         ranking.save()
     print('updated ranking changes')

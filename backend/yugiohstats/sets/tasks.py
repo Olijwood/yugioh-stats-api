@@ -274,12 +274,12 @@ def save_sets_cgv_rankings():
     mp_rankings = helpers.save_mp_rankings()
     print(mp_rankings)
     helpers.update_ranking_change()
-    helpers.update_gl_ranking_change()
     return
 
 @shared_task
 def save_sets_gainloss_rankings():
     helpers.save_gainloss_rankings_ml()
     helpers.save_gainloss_rankings_mp()
+    helpers.update_gl_ranking_change()
     return
 

@@ -24,6 +24,7 @@ from .utils import (save_results_to_csv,
                     get_set_data_directory)
 from .graphs import (create_update_set_graphs, create_update_sets_gl_graphs)
 from .validators import (get_valid_set_codes)
+from .ct_api_key import get_auth_headers
 
 __all__ = ['scrape_yugioh_sets', 'parse_yugioh_sets', 
            'sets_save_to_model', 'main_set_cards', 
@@ -38,4 +39,5 @@ __all__ = ['scrape_yugioh_sets', 'parse_yugioh_sets',
            'create_update_set_graphs', 'save_mp_rankings'
            'save_gainloss_rankings_ml', 'save_gainloss_rankings_mp',
            'get_user_cgv_gainloss', 'create_update_sets_gl_graphs',
-           'update_ranking_change', 'update_gl_ranking_change',]
+           'update_ranking_change', 'update_gl_ranking_change',
+           'get_auth_headers']

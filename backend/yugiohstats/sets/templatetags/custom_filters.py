@@ -22,6 +22,21 @@ def format_dollars(price):
         return '-$%.2f' %(abs_price)
     else:
         return 'Error'
+    
+@register.filter
+def format_sterling(price):
+    if price == None:
+        return 'N/A'
+    price = float(price)
+    if price == 0:
+        return '£%.2f' %(price)
+    elif price > 0:
+        return '+£%.2f' %(price)
+    elif price < 0:
+        abs_price = abs(price)
+        return '-£%.2f' %(abs_price)
+    else:
+        return 'Error'
 
 @register.filter
 def format_rarity(rarity):
