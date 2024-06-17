@@ -187,7 +187,7 @@ def set_stats_save_to_model(sets_stats_data):
 
 # Function to calculate percentage change
 def calculate_change(today_value, past_value):
-    if past_value is not None:
+    if past_value and today_value is not None:
         change = today_value - past_value
         change_percent = round((change / past_value) * 100, 2) if past_value != 0 else float(0)
         return change_percent
@@ -211,7 +211,10 @@ def save_mp_rankings():
 
     for set_today in set_stats_today:
         set_code = set_today.set.code
+        print(set_code)
         today_chance = round(set_today.chance_greater_opened_value_marketp, 2)
+        today_chance = SetSimulatedPriceStats.objects.filter(set__code=set_code).filter(date_simulated=today).last().chance_greater_opened_value_marketp
+        print(today_chance)
         # Calculate the 7-day change
         chance_seven_days_ago = stats_seven_days_ago_dict.get(set_code)
         seven_change_percent = calculate_change(today_chance, chance_seven_days_ago)
@@ -222,8 +225,12 @@ def save_mp_rankings():
 
         # Calculate the all-time change
         first_set_cgvmp = SetSimulatedPriceStats.objects.filter(set__code=set_code).order_by('date_simulated').first().chance_greater_opened_value_marketp
+        first_set_cgvmp = SetSimulatedPriceStats.objects.values_list('chance_greater_opened_value_marketp', flat=True).filter(set__code=set_code).order_by('date_simulated').first()
+        print(first_set_cgvmp)
         all_time_cvgmp_change_percent = calculate_change(today_chance, first_set_cgvmp)
-
+        print(all_time_cvgmp_change_percent)
+        if all_time_cvgmp_change_percent == None:
+            all_time_cvgmp_change_percent = 0
         # Save the data to the SetRankings model
         SetRankings.objects.update_or_create(
             set=set_today.set,
@@ -236,7 +243,9 @@ def save_mp_rankings():
                 'mp_cgv_all_time': all_time_cvgmp_change_percent,
             }
         )
-        ranking += 1
+        if SetRankings.objects.filter(ranking_date=today).filter(set__code=set_code).exists():
+            ranking += 1
+        # ranking += 1
 
     return "MP Rankings saved successfully."
 
@@ -261,8 +270,8 @@ def save_ml_rankings():
     for set_today in set_stats_today:
         set_code = set_today.set.code
         mp_today_chance = set_today.chance_greater_opened_value_marketp
-        today_chance = round(set_today.chance_greater_opened_value_minlisting, 2)
-        
+        ml_chance_today = SetSimulatedPriceStats.objects.filter(set__code=set_code).filter(date_simulated=today).last().chance_greater_opened_value_minlisting
+        today_chance = round(ml_chance_today, 2)
         # Calculate the 7-day change
         chance_seven_days_ago = stats_seven_days_ago_dict.get(set_code)
         seven_change_percent = calculate_change(today_chance, chance_seven_days_ago)
@@ -272,10 +281,14 @@ def save_ml_rankings():
         one_month_change_percent = calculate_change(today_chance, chance_one_month_ago)
 
         # Calculate the all-time change
-        set_list_ml_cgv = list(SetSimulatedPriceStats.objects.values_list('chance_greater_opened_value_minlisting', flat=True).filter(set__code=set_code))
-        first_ml_cgv = [ml_cgv for ml_cgv in set_list_ml_cgv if ml_cgv != None][0]
+        # set_list_ml_cgv = list(SetSimulatedPriceStats.objects.values_list('chance_greater_opened_value_minlisting', flat=True).filter(set__code=set_code))
+        # first_ml_cgv = [ml_cgv for ml_cgv in set_list_ml_cgv if ml_cgv != None][0]
+        first_ml_cgv = SetSimulatedPriceStats.objects.values_list('chance_greater_opened_value_minlisting', flat=True).filter(set__code=set_code).order_by('date_simulated').first()
+        # print(today_chance, first_ml_cgv)
         all_time_cvgml_change_percent = calculate_change(today_chance, first_ml_cgv)
-
+        # print(all_time_cvgml_change_percent)
+        if all_time_cvgml_change_percent == None:
+            all_time_cvgml_change_percent = 0
         SetRankings.objects.update_or_create(
             set=set_today.set,
             ranking_date=date.today(),
@@ -288,7 +301,8 @@ def save_ml_rankings():
                 'ml_cgv_all_time': all_time_cvgml_change_percent,
             }
         )
-        ranking += 1
+        if SetRankings.objects.filter(ranking_date=today).filter(set__code=set_code).exists():
+            ranking += 1
 
     return "ML Rankings saved successfully."
 
@@ -308,6 +322,7 @@ def save_gainloss_rankings_mp():
     ranking = 1
     for stat_today in stats_today:
         set_code = stat_today.set.code
+        print(set_code)
         today_mp_gainloss = SetSimulatedPriceStats.objects.filter(set__code=set_code).filter(date_simulated=today).last().booster_gainloss_mp
         d7_mp_gainloss = dict_stats_7d_ago.get(set_code)
         d7_change_p = calculate_change(today_mp_gainloss, d7_mp_gainloss)
@@ -330,7 +345,9 @@ def save_gainloss_rankings_mp():
                 'mp_gl_all_time': all_time_change_p
             }
         )
-        ranking += 1
+        if SetGainLossRanking.objects.filter(ranking_date=today).filter(set__code=set_code).exists():
+            ranking += 1
+        #ranking += 1
         
 def save_gainloss_rankings_ml():
     
@@ -347,8 +364,9 @@ def save_gainloss_rankings_ml():
     dict_stats_1m_ago = {stat.set.code: stat.booster_gainloss_ml for stat in stats_1m_ago}
     ranking = 1
     for stat_today in stats_today:
-        set_code = stat_today.set.code
         
+        set_code = stat_today.set.code
+        print(set_code)
         today_ml_gainloss = SetSimulatedPriceStats.objects.filter(set__code=set_code).filter(date_simulated=today).last().booster_gainloss_ml
         d7_ml_gainloss = dict_stats_7d_ago.get(set_code)
         d7_change_p = calculate_change(today_ml_gainloss, d7_ml_gainloss)
@@ -358,6 +376,8 @@ def save_gainloss_rankings_ml():
         
         get_first_gainloss_ml = list(SetSimulatedPriceStats.objects.filter(set=stat_today.set).values_list('booster_gainloss_ml', flat=True))
         get_first_gainloss_ml = [i for i in get_first_gainloss_ml if i != None][0]
+        # get_first_gainloss_ml = SetSimulatedPriceStats.objects.values_list('booster_gainloss_ml', flat=True).filter(set__code=set_code).order_by('date_simulated').first()
+        print(today_ml_gainloss, get_first_gainloss_ml)
         all_time_change_p = calculate_change(today_ml_gainloss, get_first_gainloss_ml)
 
         SetGainLossRanking.objects.update_or_create(
@@ -371,7 +391,9 @@ def save_gainloss_rankings_ml():
                 'ml_gl_all_time': all_time_change_p
             }
         )
-        ranking += 1
+        if SetGainLossRanking.objects.filter(ranking_date=today).filter(set__code=set_code).exists():
+            ranking += 1
+        #ranking += 1
 
 def update_ranking_change():
     today = date.today()

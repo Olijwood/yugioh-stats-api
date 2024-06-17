@@ -1,56 +1,60 @@
-# Yugioh Daily Automated Price Statistics 
-
-## WORK IN PROGRESS
-
-'*' This project is currently a 'Work in Progress'(WIP). Most functionality is present (which you may see when inspecting the code)
-
-Features to be completed:
-
-- Card Detail View HTML
-- Functions to simulate other yugioh sets with different probabilities for 'opening'
-- Updating the set-detail view to display the average values for the given set, its value gain/loss once opened and a graph tracking its value over time.
-- Adding a graph tracking eacg card's value over time for its corresponding detail view
-- Updating the filter functionality for the card list view for each Set (currently broken after some code changes)
-
-With this in mind, if you do attempt to run every feature with in this current stage of development you will likely run into some errors. '*'
+# Trading Card Daily Automated Price Statistics 
 
 ## Introduction
 
-This project scrapes data for (Yugioh) sets and cards from TCGPlayer. The initial scraping of the webpages is done using Selenium instead of BeautifulSoup as TCGPlayer loads the content of its pages after the GET request. BeautifulSoup is then used to find the neccesary data from the returned HTML, which will then be saved through the corresponding Django Model into the database. 
+This project automates the collection and analysis of trading card data from multiple sources, primarily focusing on Yugioh sets and cards from TCGPlayer and CardMarket (European Markets). The project leverages several technologies to efficiently scrape, process, and analyze large datasets, presenting valuable insights into the market prices and potential profitability of trading card sets.
 
-As there are hundreds of sets and countless cards it would be ineffienct to be scraping one at a time, to optimize the time for this process to occur I use Celery and Redis to aynschronously scrape the tcg pages in chunks. Celery is also used so that these 'Tasks' can be automated to run on a schedule(currently daily).
+### Key Features
 
-The initial scrape for each set's cards will gather the basic data for each card (eg: Image, Name, Rarity, Details etc) aswell as the prices. Afterwards, it will just be the Market Price and Min listed price being scraped to optimize performance. 
+- **Automated Data Collection:** Utilizes Selenium to scrape dynamic content from TCGPlayer and CardMarket's API for European market data.
 
-Each Yugioh Set comes in a variety of containers, the standard usually being a booster box. So for each set I've written a function that calculate the probability of each rarity being opened for a pack in that booster box, to then return the total value based on the market price for each 'opened' card. This will be run 10,000 times for a more accurate representation of the value of the booster box to run statistics on. Again I use Celery Tasks to optimize speed.
+- **Efficient Data Processing:** Implements Celery and Redis to handle asynchronous tasks, optimizing the scraping process by running tasks in parallel.
 
-Then using statistics I find the most likely value of the booster box (For that day's market prices of that set). With the latest being displayed on that Sets Detail Page and a graph showing the tracking history. I also calculate the percentage increase/descrease from the value of the sealed box to the probable value once opened and display that.
+- **Statistical Analysis:** Simulates the opening of booster boxes to estimate the value of each set, running these simulations 100,000 times for accuracy.
+
+- **Historical Data Tracking:** Tracks and visualizes the value changes of booster boxes over time, providing insights into market trends.
+
+- **API Integration:** Includes a RESTful API using Django Rest Framework, enabling third-party access to the collected data.
+
 
 ## Getting Started
 
-'*' This project is in development on a laptop with 16Gb RAM and an I7 processor. When the tasks are being called it uses most of the memory and processing, so if your system does not meet these specificatons I do not recommend runnning this project as it will likely crash '*'
+**Note**: This project is resource-intensive and was developed on a system with 16GB RAM and an i7 processor. Running it on systems with lower specifications may lead to performance issues.
 
-To set up the project:
+### Prerequisites
+ 
+ - Python 3.12
+ - Redis
 
-1. Ensure Redis is installed and running (listening on localhost:6379)
+### Installation
 
-2. Install all dependencies listed in requirements.txt. The project requires Python 3.12.
+1. **Ensure Redis is installed and running**(listening on localhost:6379)
+
+2. **Install dependencies:**
 
 - `pip install -r requirements.txt`
 
-3. After installing dependencies, migrate the database and start the Django server:
+3. **Migrate the database:**
 
 - `python manage.py makemigrations`
 - `python manage.py migrate`
+
+4. **In a separate terminal, launch the Celery worker:**
+
+- `celery -A yugiohstats worker --beat -l info`
+
+5. **Run initial data collection:**
+
+Find the call_tasks directory in `./backend/yugiohstats/` and run every cell in:
+
+ - `cm-main-tasks.ipynb`
+ - `tcg-main-tasks.ipynb`
+
+6. **Access the application:**
+
 - `python manage.py runserver`
 
-4. In a separate terminal, launch the Celery worker:
-
-- `celery -A yugiohscraper worker -l info`
-
-5. Open `initial-scrape.ipynb` and run all cells
-
-After following these steps, the program will run automatically everyday (unless you close the redis-server or celery workers)
+After following these steps, navigate to the link you see after running the server to see the data!
 
 ## Technologies used
 
@@ -60,6 +64,16 @@ After following these steps, the program will run automatically everyday (unless
 - **Redis**: Redis serves as the broker for Celery.
 - **Bootstrap**: Bootstrap framework is utilized for frontend styling.
 - **MatPlotLib/Seaborn**: For visualising the data analysis of the market prices
+- **Django Rest Framework**: To allow third parties to request data from this application.
+
+## WORK IN PROGRESS
+
+'*' This project is currently a 'Work in Progress'(WIP). While most functionality is operational, ongoing developments include:
+
+- Enhancing Card Detail View
+- Expanding simulation functions to accommodate various Yugioh sets with different opening probabilities.
+- Fixing and updating the filter functionality for the card list view.
+- Extending API capabilities to expose more data.
 
 ## About the Author
 
@@ -67,4 +81,4 @@ This project is maintained by **Oliver Wood**. Connect with me on [LinkedIn](htt
 
 ## Thank You
 
-Thank you for your interest in this Daily Automated Yugioh Price Statistics Project! 
+Thank you for your interest in the Trading Card Daily Automated Price Statistics Project! Your feedback and contributions are welcome as this project continues to evolve.

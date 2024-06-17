@@ -1,9 +1,9 @@
-from core.tasks import (get_simulated_total_for_qcr_core_set, 
-                        rarity_collection_get_simulated_booster_total,
-                        rarity_ii_get_simulated_booster_total,
-                        collectors_set_with_qcr_get_booster_total,
-                        collectors_set_without_qcr_get_booster_total,
-                        )
+# from core.tasks import (get_simulated_total_for_qcr_core_set, 
+#                         rarity_collection_get_simulated_booster_total,
+#                         rarity_ii_get_simulated_booster_total,
+#                         collectors_set_with_qcr_get_booster_total,
+#                         collectors_set_without_qcr_get_booster_total,
+#                         )
 from celery.result import allow_join_result
 
 # def old_simulate_multiple_core_boxes(qcr_core_set_list, num_iterations):
@@ -60,83 +60,190 @@ def simulate_multiple_core_boxes(qcr_core_set_list, num_iterations):
     
     return results
 
+def rarity_ii_get_simulated_booster_total(parsed_rarity_ii):
+    total = 0
+    
+    set_qcr_prices = [card[1] for card in parsed_rarity_ii if card[0] == 'Quarter Century']
+    set_pcr_prices = [card[1] for card in parsed_rarity_ii if card[0] == "Prismatic Collector's"]
+    set_pur_prices = [card[1] for card in parsed_rarity_ii if card[0] == "Prismatic Ultimate"]
+    set_ps_prices = [card[1] for card in parsed_rarity_ii if card[0] == "Platinum Secret"]
+    set_secret_prices = [card[1] for card in parsed_rarity_ii if card[0] == "Secret Rare"]
+    set_ultra_prices = [card[1] for card in parsed_rarity_ii if card[0] == "Ultra Rare"]
+    set_super_prices = [card[1] for card in parsed_rarity_ii if card[0] == "Super Rare"]
+
+    for _ in range(24):  # 24 packs per booster box
+        pack_total = 0
+        
+        # Super * 3 per pack
+        pack_total += sum(random.choices(set_super_prices, k=3))
+        
+        # Ultra * 4 per pack (1-in-6 chance each of being a Collector's Rare or Ultimate Rare)
+        for _ in range(4):
+            if random.randint(1, 6) == 1:
+                if random.randint(1, 2) == 1:
+                    pack_total += random.choice(set_pcr_prices)
+                else:
+                    pack_total += random.choice(set_pur_prices)
+            else:
+                pack_total += random.choice(set_ultra_prices)
+
+        # Secret * 2 per pack (1 in 4 chance of being platinum or qcr)
+        for _ in range(2):
+            if random.randint(1, 4) == 1:
+                if random.randint(1, 2) == 1:
+                    pack_total += random.choice(set_qcr_prices)
+                else:
+                    pack_total += random.choice(set_ps_prices)
+            else:
+                pack_total += random.choice(set_secret_prices)
+        
+        total += pack_total
+    
+    return total
+
 def simulate_multiple_ra02_boxes(parsed_ra02, num_iterations):
     results = []
-    chunk_size = 10
-    chunks = [num_iterations // chunk_size for _ in range(chunk_size)]
-    tasks = []
-    # Create and execute Celery tasks for each chunk
-    for chunk in chunks:
-        for _ in range(chunk):
-            
-            task = rarity_ii_get_simulated_booster_total.delay(parsed_ra02)
-            tasks.append(task)
     
-    # Gather results from Celery tasks
-    with allow_join_result():
-        for task in tasks:
-            print(task.get())
-            results.append(task.get())
-
+    for _ in range(num_iterations):
+        
+        result = rarity_ii_get_simulated_booster_total(parsed_ra02)
+        results.append(result)
+    
     return results
+
+def rarity_collection_get_simulated_booster_total(parsed_rarity_collection):
+    total = 0
+    
+    set_qcr_prices = [card[1] for card in parsed_rarity_collection if card[0] == 'Quarter Century']
+    set_pcr_prices = [card[1] for card in parsed_rarity_collection if card[0] == "Prismatic Collector's"]
+    set_pur_prices = [card[1] for card in parsed_rarity_collection if card[0] == "Prismatic Ultimate"]
+    set_ps_prices = [card[1] for card in parsed_rarity_collection if card[0] == "Platinum Secret"]
+    set_secret_prices = [card[1] for card in parsed_rarity_collection if card[0] == "Secret Rare"]
+    set_ultra_prices = [card[1] for card in parsed_rarity_collection if card[0] == "Ultra Rare"]
+    set_super_prices = [card[1] for card in parsed_rarity_collection if card[0] == "Super Rare"]
+
+    for _ in range(24):  # 24 packs per booster box
+        pack_total = 0
+        
+        # Super * 2 per pack
+        pack_total += sum(random.choices(set_super_prices, k=2))
+        
+        # Ultra * 2 per pack (1-in-6 chance each of being a Collector's Rare or Ultimate Rare)
+        for _ in range(2):
+            if random.randint(1, 6) == 1:
+                if random.randint(1, 2) == 1:
+                    pack_total += random.choice(set_pcr_prices)
+                else:
+                    pack_total += random.choice(set_pur_prices)
+            else:
+                pack_total += random.choice(set_ultra_prices)
+
+        # Secret * 1 per pack (1 in 4 chance of being platinum or qcr)
+        
+        if random.randint(1, 4) == 1:
+            if random.randint(1, 2) == 1:
+                pack_total += random.choice(set_qcr_prices)
+            else:
+                pack_total += random.choice(set_ps_prices)
+        else:
+            pack_total += random.choice(set_secret_prices)
+        
+        total += pack_total
+    
+    return total
 
 def simulate_multiple_ra01_boxes(parsed_ra01, num_iterations):
     results = []
-    chunk_size = 10
-    chunks = [num_iterations // chunk_size for _ in range(chunk_size)]
-    tasks = []
-    # Create and execute Celery tasks for each chunk
-    for chunk in chunks:
-        for _ in range(chunk):
-            
-            task = rarity_collection_get_simulated_booster_total.delay(parsed_ra01)
-            tasks.append(task)
     
-    # Gather results from Celery tasks
-    with allow_join_result():
-        for task in tasks:
-            print(task.get())
-            results.append(task.get())
-
+    for _ in range(num_iterations):
+        
+        result = rarity_collection_get_simulated_booster_total(parsed_ra01)
+        results.append(result)
+    
     return results
+
+def collectors_set_with_qcr_get_booster_total(parsed_collector_qcr):
+    total = 0
+
+    set_qcr_prices = [card[1] for card in parsed_collector_qcr if card[0] == 'Quarter Century']
+    set_collector_prices = [card[1] for card in parsed_collector_qcr if card[0] == "Collector's Rare"]
+    set_ultra_prices = [card[1] for card in parsed_collector_qcr if card[0] == "Ultra Rare"]
+    set_super_prices = [card[1] for card in parsed_collector_qcr if card[0] == "Super Rare"]
+
+    # 24 packs per box
+    # 3 ultra
+    # 21 super
+    
+    ultra_count = 3
+    super_count = 21
+
+    # handle odds for Collector in booster box
+    if random.randint(1, 3) == 1:
+        if random.randint(1, 2) == 1:
+            ultra_count -= 1
+            total += random.choice(set_collector_prices)
+        else:
+            super_count -= 1
+            total += random.choice(set_collector_prices)
+
+    # handle odds for QCR in booster box
+    if random.randint(1, 4) == 1:
+        if random.randint(1, 2) == 1:
+            ultra_count -= 1
+            total += random.choice(set_qcr_prices)
+        else:
+            super_count -= 1
+            total += random.choice(set_qcr_prices)
+        
+    total += sum(random.choices(set_ultra_prices, k=ultra_count))
+    total += sum(random.choices(set_super_prices, k=super_count))
+    return total
 
 
 def simulate_multiple_collector_qcr_boxes(parsed_collector_qcr, num_iterations):
     results = []
-    chunk_size = 10
-    chunks = [num_iterations // chunk_size for _ in range(chunk_size)]
-    tasks = []
-    # Create and execute Celery tasks for each chunk
-    for chunk in chunks:
-        for _ in range(chunk):
-            
-            task = collectors_set_with_qcr_get_booster_total.delay(parsed_collector_qcr)
-            tasks.append(task)
     
-    # Gather results from Celery tasks
-    with allow_join_result():
-        for task in tasks:
-            print(task.get())
-            results.append(task.get())
-
+    for _ in range(num_iterations):
+        
+        result = collectors_set_with_qcr_get_booster_total(parsed_collector_qcr)
+        results.append(result)
+    
     return results
+
+def collectors_set_without_qcr_get_booster_total(parsed_collector):
+    total = 0
+
+    set_collector_prices = [card[1] for card in parsed_collector if card[0] == "Collector's Rare"]
+    set_ultra_prices = [card[1] for card in parsed_collector if card[0] == "Ultra Rare"]
+    set_super_prices = [card[1] for card in parsed_collector if card[0] == "Super Rare"]
+
+    # 24 packs per box
+    # 3 ultra
+    # 21 super
+    
+    ultra_count = 3
+    super_count = 21
+
+    # handle odds for Collector in booster box
+    if random.randint(1, 3) == 1:
+        if random.randint(1, 2) == 1:
+            ultra_count -= 1
+            total += random.choice(set_collector_prices)
+        else:
+            super_count -= 1
+            total += random.choice(set_collector_prices)
+
+        
+    total += sum(random.choices(set_ultra_prices, k=ultra_count))
+    total += sum(random.choices(set_super_prices, k=super_count))
+    return total
 
 def simulate_multiple_collector_without_qcr_boxes(parsed_collector, num_iterations):
     results = []
-    chunk_size = 10
-    chunks = [num_iterations // chunk_size for _ in range(chunk_size)]
-    tasks = []
-    # Create and execute Celery tasks for each chunk
-    for chunk in chunks:
-        for _ in range(chunk):
-            
-            task = collectors_set_without_qcr_get_booster_total.delay(parsed_collector)
-            tasks.append(task)
     
-    # Gather results from Celery tasks
-    with allow_join_result():
-        for task in tasks:
-            print(task.get())
-            results.append(task.get())
-
+    for _ in range(num_iterations):
+        
+        result = collectors_set_without_qcr_get_booster_total(parsed_collector)
+        results.append(result)
+    
     return results

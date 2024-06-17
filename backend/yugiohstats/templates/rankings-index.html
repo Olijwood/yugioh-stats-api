@@ -119,7 +119,7 @@
                             <tr>
                                 <th scope='row'>{{ranking.mp_ranking}} <span class="rankingchange {{ ranking.mp_ranking_change|pn_change }}">{{ranking.mp_ranking_change|format_ranking_change}}</span></th>
                                 <td >
-                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                    <a href="{% url "set-detail" ranking.set.code %}">
                                         {{ranking.set.title}}
                                     </a>
                                 </td>
@@ -167,7 +167,7 @@
                             <tr>
                                 <th scope="row">{{ranking.ml_ranking}} <span class="rankingchange {{ ranking.ml_ranking_change|pn_change }}">{{ranking.ml_ranking_change|format_ranking_change}}</span></th>
                                 <td>
-                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                    <a href="{% url "set-detail" ranking.set.code %}">
                                         {{ranking.set.title}}
                                     </a>
                                 </td>
@@ -239,7 +239,7 @@
                                     {{ranking.mp_gl_ranking}} <span class="rankingchange {{ ranking.mp_ranking_change|pn_change }}">{{ranking.mp_ranking_change|format_ranking_change}}</span>
                                 </th>
                                 <td>
-                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                    <a href="{% url "set-detail" ranking.set.code %}">
                                         {{ranking.set.title}}
                                     </a>
                                 </td>
@@ -289,7 +289,7 @@
                                     {{ranking.ml_gl_ranking}} <span class="rankingchange {{ ranking.ml_ranking_change|pn_change }}">{{ranking.ml_ranking_change|format_ranking_change}}</span>
                                 </th>
                                 <td>
-                                    <a href="{% url "set-detail" ranking.set.id %}">
+                                    <a href="{% url "set-detail" ranking.set.code %}">
                                         {{ranking.set.title}}
                                     </a>
                                 </td>

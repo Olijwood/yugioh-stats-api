@@ -58,7 +58,7 @@ def main_scrape_cards_and_details():
 @shared_task
 def simulated_qcr_core_sets_booster_stats():
     qcr_core_set_code_strings = ['PHNI', 'AGOV', 'DUNE', 'LEDE']
-    num_iterations = 10000
+    num_iterations = 100000
     sets_booster_stats_data = []
     for qcr_core_set_string in qcr_core_set_code_strings:
         qcr_core_set = Set.objects.get(code=qcr_core_set_string)
@@ -68,6 +68,7 @@ def simulated_qcr_core_sets_booster_stats():
         mp_parsed_qcr_core_set = [[card.card_rarity, card.get_market_price()] for card in cards_qcr_core_set if card.get_market_price() != None]
         mp_simulated_values = helpers.simulate_multiple_core_boxes(mp_parsed_qcr_core_set, num_iterations)
         helpers.save_results_to_csv(qcr_core_set_string, mp_simulated_values, 'MP')
+
         mp_set_booster_stats_data = helpers.get_stats_for_simulated_set(qcr_core_set_string, 'MP', set_booster_price)
 
         ml_parsed_qcr_core_set = [[card.card_rarity, card.get_min_listing()] for card in cards_qcr_core_set if card.get_min_listing() != None]
@@ -80,6 +81,7 @@ def simulated_qcr_core_sets_booster_stats():
             'simulated_market_p_stats': mp_set_booster_stats_data,
             'simulated_min_listing_stats': ml_set_booster_stats_data
         })
+        print(sets_booster_stats_data)
         print(f'Successfully simulated {qcr_core_set_string} ')
     helpers.set_stats_save_to_model(sets_stats_data=sets_booster_stats_data)
     print('Saved qcr core sets to model')
@@ -89,7 +91,7 @@ def simulated_qcr_core_sets_booster_stats():
 def simulated_rarity_ii_booster_stats():
     ra02 = Set.objects.filter(link = 'https://www.tcgplayer.com/search/yugioh/25th-anniversary-rarity-collection-ii').first()
     ra02_cards = Card.objects.filter(set=ra02)
-    num_iterations = 10000
+    num_iterations = 100000
     sets_booster_stats_data = []
     set_booster_price = ra02.average_price
     set_code = ra02.code
@@ -116,7 +118,7 @@ def simulated_rarity_ii_booster_stats():
 
 @shared_task
 def simulated_rarity_collection_booster_stats():
-    num_iterations = 10000
+    num_iterations = 100000
     sets_booster_stats_data = []
 
     ra01 = Set.objects.get(code='RA01')
@@ -155,7 +157,7 @@ def simulated_rarity_collection_booster_stats():
 def simulated_collector_without_qcr_booster_stats():
     string_codes_for_cllcrt_sets = ['WISU', 'MAZE', 'AMDE', 'TAMA', 'GRCR', 'KICO', 'ANGU', 'GEIM', 'TOCH'] # no QCR
     sets_booster_stats_data = []
-    num_iterations = 10000
+    num_iterations = 100000
 
     for cllctr_set_code in string_codes_for_cllcrt_sets:
         cllctr_set = Set.objects.get(code=cllctr_set_code)
@@ -194,7 +196,7 @@ def simulated_collector_without_qcr_booster_stats():
 def simulated_collector_with_qcr_booster_stats():
     code_strings_for_collector_sets_with_qcr = ['VASM', 'MZMI']
     sets_booster_stats_data = []
-    num_iterations = 10000
+    num_iterations = 100000
 
     for cllctr_set_code in code_strings_for_collector_sets_with_qcr:
         cllctr_set = Set.objects.get(code=cllctr_set_code)
@@ -252,7 +254,7 @@ def update_set_gainloss():
         ml_difference = sum(ml_df['Total']) - (booster_price*ml_len)
         ml_gainloss = round((ml_difference/ml_len), 2)
         
-        today_setstats_instance = SetSimulatedPriceStats.objects.filter(set=set_instance).filter(date_simulated=today).first()
+        today_setstats_instance = SetSimulatedPriceStats.objects.filter(set=set_instance).filter(date_simulated=today).last()
         today_setstats_instance.booster_gainloss_mp = mp_gainloss
         today_setstats_instance.booster_gainloss_ml = ml_gainloss
         today_setstats_instance.save()
